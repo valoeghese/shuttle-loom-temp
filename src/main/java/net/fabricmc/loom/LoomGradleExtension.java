@@ -44,7 +44,6 @@ import org.gradle.api.artifacts.Configuration;
 import org.gradle.api.artifacts.Dependency;
 import org.gradle.api.file.ConfigurableFileCollection;
 import org.gradle.api.plugins.BasePluginConvention;
-
 import com.google.gson.JsonObject;
 
 import net.fabricmc.loom.api.decompilers.LoomDecompiler;

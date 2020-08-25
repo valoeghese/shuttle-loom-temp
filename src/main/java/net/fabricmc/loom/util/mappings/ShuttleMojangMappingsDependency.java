@@ -60,7 +60,7 @@ public class ShuttleMojangMappingsDependency extends MojangMappingsDependency {
 		project.getLogger().warn("Powered by Fabric and the Shuttle Project.");
 		project.getLogger().warn("=======================================");
 	}
-	
+
 	protected static class TinyWriterShuttle extends TinyWriter {
 		protected TinyWriterShuttle(Writer writer, String namespaceFrom, String namespaceTo) {
 			super(writer, namespaceFrom, namespaceTo);
