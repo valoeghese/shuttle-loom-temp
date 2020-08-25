@@ -37,7 +37,6 @@ import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
 
-import com.google.gson.JsonObject;
 import org.cadixdev.lorenz.MappingSet;
 import org.cadixdev.mercury.Mercury;
 import org.gradle.api.Project;
@@ -45,6 +44,8 @@ import org.gradle.api.artifacts.Configuration;
 import org.gradle.api.artifacts.Dependency;
 import org.gradle.api.file.ConfigurableFileCollection;
 import org.gradle.api.plugins.BasePluginConvention;
+
+import com.google.gson.JsonObject;
 
 import net.fabricmc.loom.api.decompilers.LoomDecompiler;
 import net.fabricmc.loom.processors.JarProcessor;
@@ -54,6 +55,7 @@ import net.fabricmc.loom.providers.MinecraftMappedProvider;
 import net.fabricmc.loom.providers.MinecraftProvider;
 import net.fabricmc.loom.util.LoomDependencyManager;
 import net.fabricmc.loom.util.mappings.MojangMappingsDependency;
+import net.fabricmc.loom.util.mappings.ShuttleMojangMappingsDependency;
 
 public class LoomGradleExtension {
 	public String runDir = "run";
@@ -108,6 +110,10 @@ public class LoomGradleExtension {
 
 	public Dependency officialMojangMappings() {
 		return new MojangMappingsDependency(project, this);
+	}
+
+	public Dependency shuttleMojangMappings() {
+		return new ShuttleMojangMappingsDependency(project, this);
 	}
 
 	public LoomGradleExtension(Project project) {

@@ -60,7 +60,7 @@ import net.fabricmc.lorenztiny.TinyMappingsReader;
 import net.fabricmc.mapping.tree.TinyMappingFactory;
 
 public class MojangMappingsDependency implements SelfResolvingDependency {
-	private final Project project;
+	protected final Project project;
 	private final LoomGradleExtension extension;
 
 	public MojangMappingsDependency(Project project, LoomGradleExtension extension) {
@@ -82,7 +82,7 @@ public class MojangMappingsDependency implements SelfResolvingDependency {
 				mappingSet = getMappingsSet(clientMappings, serverMappings);
 
 				try (Writer writer = new StringWriter()) {
-					new TinyWriter(writer, "intermediary", "named").write(mappingSet);
+					this.createTinyWriter(writer, "intermediary", "named").write(mappingSet);
 					Files.deleteIfExists(mappingsFile);
 
 					ZipUtil.pack(new ZipEntrySource[] {
@@ -95,22 +95,30 @@ public class MojangMappingsDependency implements SelfResolvingDependency {
 		}
 
 		try (BufferedReader clientBufferedReader = Files.newBufferedReader(clientMappings, StandardCharsets.UTF_8)) {
-			project.getLogger().warn("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
-			project.getLogger().warn("Using of the official minecraft mappings is at your own risk!");
-			project.getLogger().warn("Please make sure to read and understand the following license:");
-			project.getLogger().warn("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
-			String line;
-
-			while ((line = clientBufferedReader.readLine()).startsWith("#")) {
-				project.getLogger().warn(line);
-			}
-
-			project.getLogger().warn("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+			this.notifyMappings(clientBufferedReader);
 		} catch (IOException e) {
 			throw new RuntimeException("Failed to read client mappings", e);
 		}
 
 		return Collections.singleton(mappingsFile.toFile());
+	}
+
+	protected TinyWriter createTinyWriter(Writer writer, String namespaceFrom, String namespaceTo) {
+		return new TinyWriter(writer, namespaceFrom, namespaceTo);
+	}
+
+	protected void notifyMappings(BufferedReader clientBufferedReader) throws IOException {
+		project.getLogger().warn("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+		project.getLogger().warn("Using of the official minecraft mappings is at your own risk!");
+		project.getLogger().warn("Please make sure to read and understand the following license:");
+		project.getLogger().warn("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+		String line;
+
+		while ((line = clientBufferedReader.readLine()).startsWith("#")) {
+			project.getLogger().warn(line);
+		}
+
+		project.getLogger().warn("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
 	}
 
 	private MappingSet getMappingsSet(Path clientMappings, Path serverMappings) throws IOException {
@@ -236,7 +244,7 @@ public class MojangMappingsDependency implements SelfResolvingDependency {
 		}
 	}
 
-	private static class TinyWriter extends TextMappingsWriter {
+	protected static class TinyWriter extends TextMappingsWriter {
 		private final String namespaceFrom;
 		private final String namespaceTo;
 
@@ -260,9 +268,13 @@ public class MojangMappingsDependency implements SelfResolvingDependency {
 				}
 
 				for (MethodMapping methodMapping : classMapping.getMethodMappings()) {
-					writer.println("\tm\t" + methodMapping.getSignature().getDescriptor() + "\t" + methodMapping.getObfuscatedName() + "\t" + methodMapping.getDeobfuscatedName());
+					writer.println("\tm\t" + methodMapping.getSignature().getDescriptor() + "\t" + methodMapping.getObfuscatedName() + "\t" + this.deobfMethod(methodMapping));
 				}
 			});
+		}
+
+		protected String deobfMethod(MethodMapping methodMapping) {
+			return methodMapping.getDeobfuscatedName();
 		}
 	}
 }
